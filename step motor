@@ -1,0 +1,135 @@
+//#uchsoftware
+#define IN1 8 //Motorun sabit dijital pinlerini tanımlıyoruz.
+#define IN2 9
+#define IN3 10
+#define IN4 11
+//28BYJ-48 Motor.
+int steps=0; //dişli adımı tanımlıyoruz.
+int stepss=64;
+boolean Direction=true; //dogru yon.
+unsigned long last_time; //gecen zaman.
+unsigned long currentMillis; //ms cinsinden akım.
+int steps_left=64; //istedegimiz yönde adim sayisi.
+int i=0; // i'yi tanımlıtoruz.
+long time; //zaman.
+//HCSR-04.
+int trigPin=3; //trigpin 13. pine.
+int echoPin=4; //echopin 12. pine.
+long duration; //sureyi tanımlıyoruz.
+long uzaklik; //uzaklığı tanımlıyoruz.
+void setup() {
+ Serial.begin(115200);//115200 baund ile seri haberleşmeyi başlatıyoruz.
+ pinMode(IN1,OUTPUT); //pincıkıslarını alıyoruz.
+ pinMode(IN2,OUTPUT);
+ pinMode(IN3,OUTPUT); 
+ pinMode(IN4,OUTPUT);
+ pinMode(trigPin,OUTPUT);//HCSR-04
+ pinMode(echoPin,INPUT);
+ delay(1000);
+}
+void loop() {
+     //28BYJ-48 Motor.
+  if(i<64){ //1 tur gecince durması için.
+    while(steps_left>0){ //adımları döngü alıyoruz.
+    currentMillis=micros(); //akımı us olarak döndürür.
+    if(currentMillis-last_time>=1000){ //1000 ms büyükse<micros().
+      stepper(1); //step fonksiyonu.
+      time=time+micros()-last_time;//zamanı arttırıyoruz.
+      last_time=micros();// gecen zamanı us olarak alıyoruz.
+      steps_left--; //motoru dönderiyor.
+    }
+    }
+          i=i+1; //adım sayısını birer birer arttırır.
+     Serial.println(i);//adımları cıktı alır.
+     Direction=Direction;//aynı yönlü.
+     steps_left=stepss;//adım sayısı 64*64(dişli)=4096(1 tur).
+                      //açı 360/64=5,625.
+     
+
+             //HCSR-04
+     digitalWrite(trigPin, LOW); /* sensör pasif hale getirildi */
+     delayMicroseconds(5);
+     digitalWrite(trigPin, HIGH); /* Sensore ses dalgasının üretmesi için emir verildi */
+     delayMicroseconds(10);
+     digitalWrite(trigPin, LOW);  /* Yeni dalgaların üretilmemesi için trig pini LOW konumuna getirildi */ 
+     duration = pulseIn(echoPin, HIGH); /* ses dalgasının geri dönmesi için geçen sure ölçülüyor */
+     Serial.print("duration");
+     Serial.print(duration );  
+     Serial.println(" SN olarak olçulmustur.");
+     uzaklik= duration /29.1/2; /* ölçülen sure uzaklığa çevriliyor */            
+     if(uzaklik > 200)
+      uzaklik = 200;
+     Serial.print("Uzaklik ");  
+     Serial.println(uzaklik); /* hesaplanan uzaklık bilgisayara aktarılıyor */
+     Serial.println(" CM olarak olculmustur.");                
+     delay(500);//2 sn gecikme.                 
+  }
+}
+void stepper(int xw){ //step fonksiyonu.
+  for(int x=0;x<xw;x++){ //dişli döngüsü 7 durum=64.
+    switch(steps){ // dişli değişimi.
+      case 0:
+     digitalWrite(IN1, LOW); 
+     digitalWrite(IN2, LOW);
+     digitalWrite(IN3, LOW);
+     digitalWrite(IN4, HIGH);
+   break; 
+   case 1:
+     digitalWrite(IN1, LOW); 
+     digitalWrite(IN2, LOW);
+     digitalWrite(IN3, HIGH);
+     digitalWrite(IN4, HIGH);
+   break; 
+   case 2:
+     digitalWrite(IN1, LOW); 
+     digitalWrite(IN2, LOW);
+     digitalWrite(IN3, HIGH);
+     digitalWrite(IN4, LOW);
+   break; 
+   case 3:
+     digitalWrite(IN1, LOW); 
+     digitalWrite(IN2, HIGH);
+     digitalWrite(IN3, HIGH);
+     digitalWrite(IN4, LOW);
+   break; 
+   case 4:
+     digitalWrite(IN1, LOW); 
+     digitalWrite(IN2, HIGH);
+     digitalWrite(IN3, LOW);
+     digitalWrite(IN4, LOW);
+   break; 
+   case 5:
+     digitalWrite(IN1, HIGH); 
+     digitalWrite(IN2, HIGH);
+     digitalWrite(IN3, LOW);
+     digitalWrite(IN4, LOW);
+   break; 
+     case 6:
+     digitalWrite(IN1, HIGH); 
+     digitalWrite(IN2, LOW);
+     digitalWrite(IN3, LOW);
+     digitalWrite(IN4, LOW);
+   break; 
+   case 7:
+     digitalWrite(IN1, HIGH); 
+     digitalWrite(IN2, LOW);
+     digitalWrite(IN3, LOW);
+     digitalWrite(IN4, HIGH);
+   break; 
+   default:
+     digitalWrite(IN1, LOW); 
+     digitalWrite(IN2, LOW);
+     digitalWrite(IN3, LOW);
+     digitalWrite(IN4, LOW);
+   break; 
+    }
+    SetDirection();
+  }
+}
+void SetDirection(){ //yön fonksiyonu.
+  steps++;//dişli adımını arttırıyor.
+  if(steps>7){ //7 durumdan büyükse.
+    steps=0;//dişli adımı güncellenir.
+   }
+  
+}

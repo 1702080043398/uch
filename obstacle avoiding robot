@@ -1,0 +1,91 @@
+# uchsoftware
+#define echoPin 12 //define the distance sensor pins.
+#define trigPin 13 
+#define MotorR1 10 //define the motor pins.
+#define MotorR2 11
+#define MotorRE 9 
+#define MotorL1 5
+#define MotorL2 4
+#define MotorLE 3
+long duration, distance; //define two variables named duration and distance.
+ 
+void setup() {
+  // OUTPUT (Output), as the ultrasonic sensor sends sound waves from the Trig pin,
+  // defined as INPUT to learn back these waves with the Echo pin.
+  pinMode(echoPin, INPUT);
+  pinMode(trigPin, OUTPUT);
+  //define motors as output.
+  pinMode(MotorL1, OUTPUT);
+  pinMode(MotorL2, OUTPUT);
+  pinMode(MotorLE, OUTPUT); 
+  pinMode(MotorR1, OUTPUT);
+  pinMode(MotorR2, OUTPUT);
+  pinMode(MotorRE, OUTPUT);
+  //Serial communication is initiated at 9600 baunds.
+  Serial.begin(9600);
+}
+
+void loop() {
+  digitalWrite(trigPin, LOW); //sensor disabled.
+  delayMicroseconds(5);
+  digitalWrite(trigPin, HIGH); //command given to generate Sensore sound wave.
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW); // trig pin written LOW to avoid generating new waves.
+
+  duration = pulseIn(echoPin, HIGH);  // sure that it takes the sound wave to return.
+  distance = duration / 29.1 / 2;  // measured duration converts to distance.
+
+  Serial.println(distance);  // distance serial software is printing.
+
+  if (distance < 20) // If the distance is less than 20 cm,
+  {
+    backward();  // 1000 ms go backward.
+    delay(1000);
+    right();  // 1500 ms turn right.
+    delay(1500);
+  }
+  else {  // if not,
+    forward(); // go forward.
+  }
+
+}
+
+void forward(){  // define a function for the forward movement of the robot.
+
+  digitalWrite(MotorR1, HIGH); // forward movement of the right motor is active.
+  digitalWrite(MotorR2, LOW); // backward movement of the right motor is passive.
+  analogWrite(MotorRE, 200); // right motor speed 200.
+
+  digitalWrite(MotorL1, HIGH); // forward movement of the left motor is active.
+  digitalWrite(MotorL2, LOW); // backward movement of the left motor is passive.
+  analogWrite(MotorLE, 200); // left motor speed 200.
+  
+  
+}
+
+
+void right(){ // define a function for the turn right of the robot.
+
+  digitalWrite(MotorR1, HIGH); // forward movement of the right motor is active.
+  digitalWrite(MotorR2, LOW); // backward movement of the right motor is passive.
+  analogWrite(MotorRE, 0); // right motor speed 0.
+
+  digitalWrite(MotorL1, HIGH); // forward movement of the left motor is active.
+  digitalWrite(MotorL2, LOW); // backward movement of the left motor is passive.
+  analogWrite(MotorLE, 200); // left motor speed 200.
+  
+  
+}
+
+
+void backward(){ // define a function for the backward movement of the robot.
+
+  digitalWrite(MotorR1, LOW); // forward movement of the right motor is passive.
+  digitalWrite(MotorR2, HIGH); // backward movement of the right motor is active.
+  analogWrite(MotorRE, 200); // right motor speed 200.
+
+  digitalWrite(MotorL1, LOW); // forward movement of the left motor is passive.
+  digitalWrite(MotorL2, HIGH); // backward movement of the left motor is active.
+  analogWrite(MotorLE, 200); // left motor speed 200.
+  
+}

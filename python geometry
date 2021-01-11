@@ -1,0 +1,55 @@
+// #uchsoftware
+def geometry(shape):
+    if len(shape) == 3:
+        a = shape[0]
+        b = shape[1]
+        c = shape[2]
+
+        if (a+b) > c and (a+c) > b and (b+c) > a:
+            if(a==b) and (a==c) and (b==c):
+                print("Equilateral Triangle")
+            elif(a==b) and (a==c):
+                print("Isosceles Triangle")
+            else:
+                print("Scalene Triangle")
+
+        else:
+            print("Does not specify a triangle")
+
+
+    elif len(shape) == 4:
+        a = shape[0]
+        b = shape[1]
+        c = shape[2]
+        d = shape[3]
+        if (a==b) and (a==c) and (a==d):
+            print("Square")
+        elif (a==c) and (b==d):
+            print("Rectangle")
+        else:
+            print("Regular Square")
+
+
+    else:
+        print("Not any shape")
+
+
+while(True):
+    number_elements = int(input("Enter the Number of Elements:"))
+    if(number_elements ==3):
+        a = int(input("a:"))
+        b = int(input("b:"))
+        c = int(input("c:"))
+        geometry([a, b, c])
+
+
+    elif(number_elements == 4):
+        a = int(input("a:"))
+        b = int(input("b:"))
+        c = int(input("c:"))
+        d = int(input("d:"))
+        geometry([a, b, c, d])
+
+
+    else:
+        print("Please Enter Again")

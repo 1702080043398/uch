@@ -1,0 +1,47 @@
+# uchsoftware
+#include <VirtualWire.h>
+#include <MPU6050.h>
+#include <Wire.h>
+MPU6050 sensor;
+const int led_pin = 13; //   LED pini tanımlanmıştır.
+const int transmit_pin = 3; // Verici Modül pini tanımlanmıştır.
+int SCL=A5;  //Serial Clock pini tanımlanmıştır.
+int SDA=A4;   //Serial Data  pini tanımlanmıştır.
+byte encodedVal[2];
+int ivmeX , ivmeY , ivmeZ , GyroX , GyroY , GyroZ;
+
+void setup() {
+  Serial.begin(9600);
+  Wire.begin();
+  sensor.initialize();
+  vw_set_tx_pin(transmit_pin); // Vericiyi başlatıyoruz.
+  vw_setup(2000);       // Saniyedeki bit sayısı.
+  pinMode(led_pin, OUTPUT); //Seri haberleşmeyi teyit et.
+}
+
+void loop() {
+  sensor.getAcceleration(&ivmeX, &ivmeY, &ivmeZ);
+  sensor.getRotation(&GyroX, &GyroY, &GyroZ);
+//ivmeX değerini 10 bit’lik digital değere çevir.
+  ivmeX = map(ivmeX, -17000, 17000, 0, 1023);
+    // ivmeX değerini encodedVal değerine dönüştür.
+  encode(ivmeX, encodedVal);
+  // Haberleşme gerçelşirse Led’i yak.
+  digitalWrite(led_pin, HIGH); 
+  //Vericiyi kullanarak encodedVal değerini gönder.
+  send(encodedVal);
+  digitalWrite(led_pin, LOW);
+  delay(10); //10 ms bekle.
+}
+// encodedVal değerini 2 byte’lık bir diziye dönüştür.
+void encode(int val, byte *encoded ) {
+  encoded[0] = lowByte(val);
+  encoded[1] = highByte(val);
+}
+
+// byte dizisini alıcıya gönder.
+void send (byte *message) 
+{ 
+    vw_send(message, sizeof(message)); 
+    vw_wait_tx(); //  Mesajın tamamı gidene kadar bekleyin.
+}
